@@ -1,9 +1,3 @@
-import os
-import requests
-from datetime import datetime
-from decimal import Decimal
-from itertools import count
-
 from PyInquirer import prompt
 
 from atm.commands import VALID_COMMANDS
@@ -14,21 +8,29 @@ from atm.process import check_auth, process_cmd
 console = [{'type': 'input', 'name': 'cmd', 'message': '>'}]
 
 
-while True:
-    entry = prompt(console)
+def main():
+    while True:
+        entry = prompt(console)
+        if process_entry(entry['cmd']):
+            break
 
+
+def process_entry(entry):
+    # Validate user input
     error, cmd, args = parse_entry(entry, command_list=VALID_COMMANDS)
     if error:
         print(error)
-        continue
+        return
 
     # Auth gate account actions
     error = check_auth(cmd)
     if error:
         print(error)
-        continue
+        return
 
     # Process command
-    end = process_cmd(cmd, args)
-    if end:
-        break
+    return process_cmd(cmd, args)
+
+
+if __name__ == "__main__":
+    main()

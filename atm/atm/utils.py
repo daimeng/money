@@ -1,6 +1,12 @@
+import re
+
+
+ANY_SPACE = re.compile(r'\s+')
+
+
 def parse_entry(entry, command_list):
     # Parsing command
-    cmd, *vargs = entry['cmd'].strip().split(' ')
+    cmd, *vargs = ANY_SPACE.split(entry.strip())
     if cmd not in command_list:
         return f'Invalid command "{cmd}".', None, None
 

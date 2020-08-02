@@ -35,22 +35,22 @@ def check_auth(cmd):
             return 'Authorization required.'
 
 
-def process_cmd(cmd, args, session=SESSION):
-    account_id = session.get('account_id')
-    token = session.get('token')
+def process_cmd(cmd, args):
+    account_id = SESSION.get('account_id')
+    token = SESSION.get('token')
 
     # Session management commands
-    if cmd == 'authorize':
+    if 'authorize' == cmd:
         res = remote_call('POST', 'authorize', auth=(args['account_id'], args['pin']))
         if res.ok:
             data = res.json()
-            session['account_id'] = args['account_id']
-            session['token'] = data['token']
+            SESSION['account_id'] = args['account_id']
+            SESSION['token'] = data['token']
             print(f"{args['account_id']} successfully authorized.")
         else:
             print('Authorization failed.')
 
-    elif cmd == 'logout':
+    elif 'logout' == cmd:
         # Nothing to do
         if account_id is None:
             print('No account is currently authorized.')
@@ -63,25 +63,25 @@ def process_cmd(cmd, args, session=SESSION):
             print(f'Session expired.')
 
         # Always clear vars
-        session.clear()
+        SESSION.clear()
 
-    elif cmd == 'end':
+    elif 'end' == cmd:
         # logout first if active session
-        if session:
+        if SESSION:
             res = remote_call('POST', f'logout/{token}')
             if res.ok:
                 print(f'Account {account_id} logged out.')
         return True
 
-    elif cmd == 'help':
+    elif 'help' == cmd:
         for k, v in VALID_COMMANDS.items():
             print(k, ' '.join(f'<{vv}>' for vv in v))
 
     # Account actions
-    elif cmd == 'withdraw':
+    elif 'withdraw' == cmd:
         value = Decimal(args['value'])
 
-        if value % 20 != 0:
+        if value % 20:
             print(f'Withdrawal amount must be multiple of 20.')
             return
 
@@ -89,29 +89,31 @@ def process_cmd(cmd, args, session=SESSION):
         if res.ok:
             data = res.json()
             print(f"Amount dispensed: ${value:13.0f}")
-            overdraft = Decimal(data.get('overdraft'))
+            overdraft = data.get('overdraft')
             if overdraft:
-                print(f"You have been charged an overdraft fee of {overdraft:.2f}$.")
+                print(
+                    f"You have been charged an overdraft fee of {Decimal(overdraft):.2f}$."
+                )
             print(f"Current balance: {Decimal(data['balance']):19.2f}")
         elif res.status_code == 409:
             print(
                 'Your account is overdrawn! You may not make withdrawals at this time.'
             )
 
-    elif cmd == 'deposit':
+    elif 'deposit' == cmd:
         value = Decimal(args['value'])
         res = remote_call('POST', f'deposit/{value}')
         if res.ok:
             data = res.json()
             print(f"Current balance: {Decimal(data['balance']):19.2f}")
 
-    elif cmd == 'balance':
+    elif 'balance' == cmd:
         res = remote_call('GET', 'balance')
         if res.ok:
             data = res.json()
             print(f"Current balance: {Decimal(data['balance']):19.2f}")
 
-    elif cmd == 'history':
+    elif 'history' == cmd:
         res = remote_call('GET', 'history')
         if res.ok:
             data = res.json()

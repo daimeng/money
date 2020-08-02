@@ -69,10 +69,12 @@ def create_app():
                 db.session.add(account)
                 db.session.flush()  # flush for id
 
-                exchange = Exchange(
-                    account_id=account.id, amount=Decimal(data['BALANCE']), party='BANK'
-                )
-                db.session.add(exchange)
+                balance = Decimal(data['BALANCE'])
+                if balance:
+                    exchange = Exchange(
+                        account_id=account.id, amount=balance, party='BANK'
+                    )
+                    db.session.add(exchange)
                 db.session.commit()
 
     return app
