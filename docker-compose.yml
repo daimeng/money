@@ -2,8 +2,8 @@ version: '3.8'
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ./bank
+      dockerfile: ./Dockerfile.dev
     ports:
       - 5000:5000
     restart: always
@@ -16,9 +16,24 @@ services:
     env_file:
       - db.env
     volumes:
-      - .:/var/code:delegated
+      - ./bank:/var/code:delegated
     command:
       ./wait-pg.sh ./start.sh
+  atm:
+    build:
+      context: ./atm
+      dockerfile: ./Dockerfile.dev
+    restart: always
+    environment:
+      - BANK_HOST=app
+      - BANK_PORT=5000
+    depends_on:
+      - app
+    volumes:
+      - ./atm:/var/code:delegated
+    command:
+      sleep infinity
+      # - cash-box:/var/code/cash_box:delegated
   db:
     image: "postgres"
     env_file:
@@ -28,3 +43,4 @@ services:
 
 volumes:
   db-data:
+  # cash-box:

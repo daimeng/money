@@ -1,0 +1,20 @@
+FROM python:3.8-slim-buster
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /var/code
+
+ENV PYTHONPATH "/var/code:${PYTHONPATH}"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
+
+RUN useradd appuser && chown -R appuser /var/code
+USER appuser

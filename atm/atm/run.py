@@ -1,9 +1,12 @@
+import os
 import requests
 from datetime import datetime
 from decimal import Decimal
 from itertools import count
 
 from PyInquirer import prompt
+
+from atm.utils import parse_entry
 
 
 VALID_COMMANDS = {
@@ -19,7 +22,7 @@ VALID_COMMANDS = {
 
 ACCOUNT_ID = None
 TOKEN = None
-HOST = 'http://localhost:5000'
+HOST = f"http://{os.getenv('BANK_HOST', 'localhost')}:{os.getenv('BANK_PORT', '5000')}"
 
 
 def remote_call(method, path, **kwargs):
@@ -43,25 +46,10 @@ def remote_call(method, path, **kwargs):
 console = [{'type': 'input', 'name': 'cmd', 'message': '>'}]
 
 
-def parse_entry(entry, command_list=VALID_COMMANDS):
-    # Parsing command
-    cmd, *vargs = entry['cmd'].strip().split(' ')
-    if cmd not in command_list:
-        return f'Invalid command "{cmd}".', None, None
-
-    arg_list = command_list[cmd]
-    if len(vargs) != len(arg_list):
-        return f"Usage: {cmd} {' '.join(f'<{v}>' for v in arg_list)}", None, None
-
-    args = dict(zip(arg_list, vargs))
-
-    return None, cmd, args
-
-
 while True:
     entry = prompt(console)
 
-    error, cmd, args = parse_entry(entry)
+    error, cmd, args = parse_entry(entry, command_list=VALID_COMMANDS)
     if error:
         print(error)
         continue
