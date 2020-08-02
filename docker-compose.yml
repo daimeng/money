@@ -31,9 +31,9 @@ services:
       - app
     volumes:
       - ./atm:/var/code:delegated
+      - cashbox:/var/code/cashbox:delegated
     command:
       sleep infinity
-      # - cash-box:/var/code/cash_box:delegated
   db:
     image: "postgres"
     env_file:
@@ -43,4 +43,4 @@ services:
 
 volumes:
   db-data:
-  # cash-box:
+  cashbox:

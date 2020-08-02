@@ -1,4 +1,6 @@
+from decimal import Decimal
 from uuid import uuid4
+
 from atm.run import process_entry
 from atm.utils import ANY_SPACE
 
@@ -102,3 +104,18 @@ Current balance:              -25.00
     end = process_entry('end')
     assert end
     assert capsys.readouterr().out == 'Account 2001377812 logged out.\n'
+
+
+def test_empty_atm(capsys):
+    process_entry('authorize 1434597300 4557')
+    assert capsys.readouterr().out == '1434597300 successfully authorized.\n'
+
+    process_entry('withdraw 90000')
+    lines = capsys.readouterr().out.split('\n')
+    assert lines[0] == 'Unable to dispense full amount requested at this time.'
+    assert Decimal(ANY_SPACE.split(lines[1])[3]) < 90000
+
+    process_entry('withdraw 20')
+    assert (
+        capsys.readouterr().out == 'Unable to process your withdrawal at this time.\n'
+    )
