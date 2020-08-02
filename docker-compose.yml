@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - 5000:5000
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=bank/app.py
+      - POSTGRES_URL=db
+    env_file:
+      - db.env
+    volumes:
+      - .:/var/code:delegated
+    command:
+      ./wait-pg.sh ./start.sh
+  db:
+    image: "postgres"
+    env_file:
+      - db.env
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+
+volumes:
+  db-data:

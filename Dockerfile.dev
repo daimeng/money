@@ -1,0 +1,22 @@
+FROM python:3.8-slim-buster
+
+EXPOSE 5000
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && apt-get install -y postgresql
+
+WORKDIR /var/code
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
+
+RUN useradd appuser && chown -R appuser /var/code
+USER appuser
