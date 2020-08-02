@@ -26,8 +26,8 @@ def test_history_balance_overdraft(authed_client, freezer):
     res = authed_client.get('/history')
     assert res.status_code == 200
     assert res.json == [
-        {'amount': '1.0000', 'created_at': now, 'party': 'ATM'},
-        {'amount': '-2.0000', 'created_at': now, 'party': 'ATM'},
-        {'amount': '-5.0000', 'created_at': now, 'party': 'BANK'},
-        {'amount': '3.0000', 'created_at': now, 'party': 'ATM'},
+        {'amount': '1.0000', 'created_at': now, 'party': 'ATM', 'balance': '1.0000'},
+        {'amount': '-2.0000', 'created_at': now, 'party': 'ATM', 'balance': '-1.0000'},
+        {'amount': '-5.0000', 'created_at': now, 'party': 'BANK', 'balance': '-6.0000'},
+        {'amount': '3.0000', 'created_at': now, 'party': 'ATM', 'balance': '-3.0000'},
     ]
