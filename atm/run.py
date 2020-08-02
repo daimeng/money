@@ -1,11 +1,7 @@
-import regex
 import requests
 from datetime import datetime
 from decimal import Decimal
 from itertools import count
-from pprint import pprint
-
-from prompt_toolkit.validation import Validator, ValidationError
 
 from PyInquirer import prompt
 
@@ -46,20 +42,29 @@ def remote_call(method, path, **kwargs):
 
 console = [{'type': 'input', 'name': 'cmd', 'message': '>'}]
 
+
+def parse_entry(entry, command_list=VALID_COMMANDS):
+    # Parsing command
+    cmd, *vargs = entry['cmd'].strip().split(' ')
+    if cmd not in command_list:
+        return f'Invalid command "{cmd}".', None, None
+
+    arg_list = command_list[cmd]
+    if len(vargs) != len(arg_list):
+        return f"Usage: {cmd} {' '.join(f'<{v}>' for v in arg_list)}", None, None
+
+    args = dict(zip(arg_list, vargs))
+
+    return None, cmd, args
+
+
 while True:
     entry = prompt(console)
 
-    # Parsing command
-    cmd, *vargs = (x.strip() for x in entry['cmd'].strip().split(' '))
-    if cmd not in VALID_COMMANDS:
-        print(f'Invalid command "{cmd}".')
+    error, cmd, args = parse_entry(entry)
+    if error:
+        print(error)
         continue
-
-    if len(vargs) != len(VALID_COMMANDS[cmd]):
-        print('Missing arguments.')
-        continue
-
-    args = dict(zip(VALID_COMMANDS[cmd], vargs))
 
     # Auth gate account actions
     if ACCOUNT_ID is None:
@@ -108,7 +113,12 @@ while True:
 
     # Account actions
     elif cmd == 'withdraw':
-        value = int(args['value'])
+        value = Decimal(args['value'])
+
+        if value % 20 != 0:
+            print(f'Withdrawal amount must be multiple of 20.')
+            continue
+
         res = remote_call('POST', f'withdraw/{value}')
         if res.ok:
             data = res.json()
@@ -123,7 +133,7 @@ while True:
             )
 
     elif cmd == 'deposit':
-        value = int(args['value'])
+        value = Decimal(args['value'])
         res = remote_call('POST', f'deposit/{value}')
         if res.ok:
             data = res.json()
@@ -142,6 +152,12 @@ while True:
             if not data:
                 print('No history found.')
             else:
+                print(
+                    'DATE'.rjust(10),
+                    'TIME'.rjust(8),
+                    'AMOUNT'.rjust(13),
+                    'BALANCE'.rjust(19),
+                )
                 for row in data:
                     dt = datetime.fromtimestamp(row['created_at'])
                     print(
