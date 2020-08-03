@@ -21,12 +21,10 @@ def authorize():
 
     # CHECK creds
     account = Account.query.filter(Account.account_id == auth.username).one_or_none()
-    print(account)
     if not account:
         return jsonify({'reason': 'Unauthorized'}), 401
 
     pin_encrypted = encrypt_pin(auth.password, account.salt)
-    print(account.pin_encrypted, pin_encrypted)
     if account.pin_encrypted != pin_encrypted:
         return jsonify({'reason': 'Unauthorized'}), 401
 

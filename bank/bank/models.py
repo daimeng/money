@@ -8,7 +8,7 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     account_id = db.Column(db.String, unique=True, nullable=False)
     pin_encrypted = db.Column(db.String, nullable=False)
-    # PIN is short. Salt to help impede rainbow table attacks
+    # PIN is short, salt to help impede rainbow tables
     salt = db.Column(db.String, nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=False), default=datetime.utcnow, nullable=False

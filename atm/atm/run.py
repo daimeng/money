@@ -9,6 +9,7 @@ console = [{'type': 'input', 'name': 'cmd', 'message': '>'}]
 
 
 def main():
+    # Loop until end
     while True:
         entry = prompt(console)
         if process_entry(entry['cmd']):

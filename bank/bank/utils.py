@@ -10,6 +10,7 @@ from bank.db import db
 
 
 def get_balance(account_id):
+    """Helper to get current account balance"""
     return (
         db.session.query(db.func.SUM(Exchange.amount))
         .filter(Exchange.account_id == g.session.account_id)

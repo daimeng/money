@@ -1,5 +1,4 @@
 Flask==1.1.2
 Flask-SQLAlchemy==2.4.4
 psycopg2-binary==2.8.4
-PyInquirer==1.0.3
 requests==2.24.0

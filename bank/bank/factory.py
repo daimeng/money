@@ -54,11 +54,12 @@ def create_app():
 
         g.session = session
 
-    # custom "flask <command>"s
+    # INIT db, custom flask command
     @app.cli.command('initdb')
     def initdb():
         db.create_all()
 
+    # LOAD initial state
     @app.cli.command('load-state')
     def load_state():
         with open('state.csv', 'r') as f:
