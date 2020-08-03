@@ -3,6 +3,7 @@ import secrets
 from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, request
 from bank.models import Account, Session
+from bank.utils import encrypt_pin
 from bank.db import db
 
 auth_bp = Blueprint('auth', __name__)
@@ -19,10 +20,14 @@ def authorize():
         return jsonify({'reason': 'AuthMissing'}), 400
 
     # CHECK creds
-    account = Account.query.filter(
-        Account.account_id == auth.username, Account.pin == auth.password
-    ).one_or_none()
+    account = Account.query.filter(Account.account_id == auth.username).one_or_none()
+    print(account)
     if not account:
+        return jsonify({'reason': 'Unauthorized'}), 401
+
+    pin_encrypted = encrypt_pin(auth.password, account.salt)
+    print(account.pin_encrypted, pin_encrypted)
+    if account.pin_encrypted != pin_encrypted:
         return jsonify({'reason': 'Unauthorized'}), 401
 
     # CHECK existing session

@@ -1,6 +1,6 @@
 import csv
-import uuid
 import os
+from uuid import uuid4
 from datetime import datetime
 from decimal import Decimal
 from flask import Flask, request, g, jsonify
@@ -9,6 +9,7 @@ from bank.api.exchange import exchange_bp
 from bank.api.query import query_bp
 from bank.api.auth import auth_bp
 from bank.models import Account, Exchange, Session
+from bank.utils import encrypt_pin
 from bank.db import db
 
 
@@ -65,7 +66,12 @@ def create_app():
             header = next(reader)
             for row in reader:
                 data = dict(zip(header, row))
-                account = Account(account_id=data['ACCOUNT_ID'], pin=data['PIN'])
+                salt = uuid4()
+                account = Account(
+                    account_id=data['ACCOUNT_ID'],
+                    pin_encrypted=encrypt_pin(data['PIN'], salt),
+                    salt=salt,
+                )
                 db.session.add(account)
                 db.session.flush()  # flush for id
 

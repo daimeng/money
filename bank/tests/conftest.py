@@ -2,9 +2,11 @@ import base64
 import os
 import pytest
 import testing.postgresql
+from uuid import uuid4
 from sqlalchemy import create_engine
 
 from bank.factory import create_app, db as _db
+from bank.utils import encrypt_pin
 from bank.models import Account
 
 
@@ -55,7 +57,10 @@ def session(db):
 # Default test account
 @pytest.fixture(scope='function')
 def account(session):
-    acc = Account(account_id='1234567890', pin='1234')
+    salt = uuid4()
+    acc = Account(
+        account_id='1234567890', pin_encrypted=encrypt_pin('1234', salt), salt=salt
+    )
     session.add(acc)
     session.commit()
 
@@ -71,6 +76,7 @@ def client(app, account):
 @pytest.fixture(scope='function')
 def authed_client(app, client):
     res = client.post('/authorize')
+    print(res.json)
     token = res.json['token']
     authed = app.test_client()
     authed.environ_base['HTTP_AUTHORIZATION'] = f'Bearer {token}'
