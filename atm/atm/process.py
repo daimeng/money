@@ -23,7 +23,7 @@ def remote_call(method, path, **kwargs):
             method, url, headers={'Content-Type': 'application/json'}, **kwargs
         )
 
-    return requests.request(
+    resp = requests.request(
         method,
         url,
         headers={
@@ -32,6 +32,12 @@ def remote_call(method, path, **kwargs):
         },
         **kwargs,
     )
+
+    if resp.status_code == 401:
+        print('Session expired.')
+        SESSION.clear()
+
+    return resp
 
 
 def check_auth(cmd):

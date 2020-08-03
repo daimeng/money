@@ -8,6 +8,9 @@ ANY_SPACE = re.compile(r'\s+')
 
 
 def parse_entry(entry, command_list):
+    """
+    Takes a string and parses it into command and argument object
+    """
     # Parsing command
     cmd, *vargs = ANY_SPACE.split(entry.strip())
     if cmd not in command_list:
@@ -32,10 +35,12 @@ def parse_entry(entry, command_list):
 
 
 def bill_count():
+    """Count the bills in ATM cash box"""
     return len(glob.glob('cashbox/*.twenty'))
 
 
 def dispense_bills(count):
+    """Dispense bills from ATM cash box"""
     dispensed = 0
     for f in glob.glob('cashbox/*.twenty')[:count]:
         os.remove(f)
